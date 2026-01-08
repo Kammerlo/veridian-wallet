@@ -1,17 +1,17 @@
 const markSeedPhraseAsVerifiedMock = jest.fn();
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
-import TRANSLATIONS from "../../../../../locales/en/en.json";
-import { TabsRoutePath } from "../../../../../routes/paths";
-import { makeTestStore } from "../../../../utils/makeTestStore";
-import { passcodeFiller } from "../../../../utils/passcodeFiller";
+import TRANSLATIONS from "../../../locales/en/en.json";
+import { TabsRoutePath } from "../../../routes/paths";
+import { makeTestStore } from "../../utils/makeTestStore";
+import { passcodeFiller } from "../../utils/passcodeFiller";
 import { VerifySeedPhraseCard } from "./VerifySeedPhraseCard";
 import { VerifySeedPhraseModal } from "./VerifySeedPhraseModal";
 
 const SeedPhrase =
   "example1 example2 example3 example4 example5 example6 example7 example8 example9 example10 example11 example12 example13 example14 example15 example16 example17 example18";
 
-jest.mock("../../../../../core/agent/agent", () => ({
+jest.mock("../../../core/agent/agent", () => ({
   Agent: {
     agent: {
       getMnemonic: jest.fn(() => Promise.resolve(SeedPhrase)),
