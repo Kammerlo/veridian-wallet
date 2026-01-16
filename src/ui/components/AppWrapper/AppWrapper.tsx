@@ -94,6 +94,7 @@ import {
   notificationStateChanged,
   operationCompleteHandler,
   operationFailureHandler,
+  removeInvalidConnectionCacheHandler,
 } from "./coreEventListeners";
 import { useActivityTimer } from "./hooks/useActivityTimer";
 
@@ -828,6 +829,10 @@ const AppWrapper = (props: { children: ReactNode }) => {
 
     Agent.agent.multiSigs.onGroupAdded((event) => {
       groupCreatedHandler(event, dispatch);
+    });
+
+    Agent.agent.connections.onConnectionInvalid((event) => {
+      removeInvalidConnectionCacheHandler(event, dispatch);
     });
   };
 

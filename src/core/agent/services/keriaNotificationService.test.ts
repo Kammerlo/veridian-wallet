@@ -191,6 +191,7 @@ const connectionPairStorage = jest.mocked({
   update: jest.fn(),
   findById: jest.fn(),
   findAllByQuery: jest.fn(),
+  findByContactId: jest.fn(),
   getAll: jest.fn(),
 });
 
@@ -253,6 +254,7 @@ const connectionService = jest.mocked({
     historyItems: [],
   }),
   shareIdentifier: jest.fn(),
+  markConnectionPendingDelete: jest.fn(),
 });
 const keriaNotificationService = new KeriaNotificationService(
   agentServicesProps,
@@ -4410,6 +4412,61 @@ describe("Long running operation tracker", () => {
     await expect(
       keriaNotificationService.processOperation(operationRecord)
     ).rejects.toThrow(errorMessage);
+  });
+
+  test("Should mark connection pending delete and emit Invalid event if OOBI operation finishes without an Identifier", async () => {
+    const oobiUrl = "http://keria:3902/oobi/123456";
+    const contactId = "123456";
+
+    const operationMock = {
+      metadata: {
+        oobi: oobiUrl,
+      },
+      done: true,
+      response: {
+        // i is missing here
+        dt: new Date(),
+      },
+    };
+    operationsGetMock.mockResolvedValue(operationMock);
+    connectionPairStorage.findByContactId = jest.fn().mockResolvedValue([
+      { identifier: "my-identifier-1" },
+      { identifier: "my-identifier-2" },
+    ]);
+
+    const operationRecord = {
+      type: "OperationPendingRecord",
+      id: "oobi.test-id",
+      recordType: "oobi",
+    } as OperationPendingRecord;
+
+    await keriaNotificationService.processOperation(operationRecord);
+
+    expect(connectionService.markConnectionPendingDelete).toHaveBeenCalledTimes(2);
+    expect(connectionService.markConnectionPendingDelete).toHaveBeenNthCalledWith(
+      1,
+      contactId,
+      "my-identifier-1"
+    );
+    expect(connectionService.markConnectionPendingDelete).toHaveBeenNthCalledWith(
+      2,
+      contactId,
+      "my-identifier-2"
+    );
+    expect(eventEmitter.emit).toHaveBeenCalledWith({
+      type: EventTypes.ConnectionInvalid,
+      payload: {
+        contactId,
+        identifier: "my-identifier-1",
+      },
+    });
+    expect(eventEmitter.emit).toHaveBeenCalledWith({
+      type: EventTypes.ConnectionInvalid,
+      payload: {
+        contactId,
+        identifier: "my-identifier-2",
+      },
+    });
   });
 });
 
