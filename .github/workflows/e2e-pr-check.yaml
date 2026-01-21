@@ -42,7 +42,7 @@ jobs:
           fi
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@92770a8d909d43f2e5afdd9b7092a90f2dd85b52 # v3.0.0
         with:
           api-level: 36
           target: default
@@ -69,12 +69,9 @@ jobs:
           java -version
           ./gradlew assembleDebug -Dorg.gradle.java.home="$JAVA_HOME"
           cd ..
-
-      - name: Create .env file
-        run: |
           APP_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -1)
-          echo APP_PATH=$APP_PATH > .env
-          echo "APP_PATH set to: $APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> "$GITHUB_ENV"
+          echo "Saved APK path: $APP_PATH"
 
       - name: Start Appium
         run: |
