@@ -42,7 +42,7 @@ jobs:
           fi
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@92770a8d909d43f2e5afdd9b7092a90f2dd85b52 # v3.0.0
+        uses: android-actions/setup-android@v3
         with:
           api-level: 36
           target: default
