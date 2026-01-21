@@ -44,8 +44,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          api-level: 36
-          target: default
+          api-level: 34
+          target: google_apis
           arch: x86_64
 
       - name: Verify Java after Android SDK setup
@@ -98,11 +98,24 @@ jobs:
           api-level: 34
           target: google_apis
           arch: x86_64
+          profile: pixel_5
           force-avd-creation: false
-          emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot-save -no-boot-anim
+          boot-timeout-minutes: 15
+          emulator-options: -no-window -no-audio -gpu swiftshader_indirect -no-snapshot-save -no-boot-anim -no-snapshot-load
           disable-animations: true
           script: |
-            for i in {1..10}; do curl -s http://127.0.0.1:4723/wd/hub/status && break || sleep 3; done
+            echo "Waiting for Appium to be ready..."
+            for i in {1..20}; do 
+              if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null 2>&1; then
+                echo "Appium is ready"
+                break
+              fi
+              echo "Waiting for Appium... ($i/20)"
+              sleep 3
+            done
+            echo "Verifying emulator is connected..."
+            adb devices -l
+            echo "Running E2E tests..."
             npm run wdio:android:s24ultra -- --spec ./tests/features/onboarding/onboarding-intro.feature
 
       - name: Cleanup
