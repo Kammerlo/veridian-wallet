@@ -13,6 +13,7 @@ Feature: New Wallet Creation End-to-End Flow
     Then user can see "Create a password" title
     When user taps "Set up later" button
     And user confirms skip password
+    And user is on Connect to Veridian screen
     Then user navigates to SSI Agent Advanced Setup screen
     When user enters boot URL "default"
     And user enters connect URL "default"
@@ -42,6 +43,7 @@ Feature: New Wallet Creation End-to-End Flow
     And user enters password "TestPassword123!"
     And user enters confirm password "TestPassword123!"
     And user taps "Create password" button
+    And user is on Connect to Veridian screen
     Then user navigates to SSI Agent Advanced Setup screen
     When user enters boot URL "default"
     And user enters connect URL "default"

@@ -5,6 +5,7 @@ Feature: Onboarding Individual Profile Creation
     And user generate passcode on Passcode screen
     And user skip Biometric popup if it exist
     And skip Create Password screen
+    And user is on Connect to Veridian screen
     And user navigates to SSI Agent Advanced Setup screen
     And SSI Agent URLs are cleared
     When user enters boot URL "default"

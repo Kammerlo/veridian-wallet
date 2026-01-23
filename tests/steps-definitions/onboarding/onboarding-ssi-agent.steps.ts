@@ -13,6 +13,41 @@ Then(/^user can see SSI Agent Details screen$/, async function () {
   await SsiAgentDetailsScreen.loads();
 });
 
+Given(/^user is on Connect to Veridian screen$/, async function() {
+  // Switch to webview context (switchToAppWebview already has fallback logic built in)
+  const { switchToAppWebview } = await import("../../helpers/webview.helper.js");
+  await browser.pause(2000); // Wait for app to fully load
+  await switchToAppWebview();
+  
+  // Wait for navigation to SSI Agent screen and verify Connect to Veridian screen loads
+  await browser.waitUntil(
+    async () => {
+      const url = await browser.getUrl().catch(() => "");
+      return (url.includes("ssiagent") || url.includes("ssi-agent")) && 
+             await ConnectToVeridianScreen.getConnectedButton.isDisplayed().catch(() => false);
+    },
+    {
+      timeout: 10000,
+      timeoutMsg: "Did not navigate to Connect to Veridian screen after skipping password",
+    }
+  );
+  
+  // Click "Get connected" button to proceed to Scan screen
+  await ConnectToVeridianScreen.getConnectedButton.click();
+  
+  // Wait for Scan screen to appear
+  await browser.waitUntil(
+    async () => await SsiAgentScanScreen.scanContainer.isDisplayed().catch(() => false),
+    {
+      timeout: 10000,
+      timeoutMsg: "Did not navigate to Scan screen after clicking Get connected",
+    }
+  );
+  
+  // Dismiss camera dialog if it appears
+  await SsiAgentScanScreen.dismissCameraModeDialog();
+});
+
 Given(/^user navigates to SSI Agent Advanced Setup screen$/, async function() {
   const isOnAdvancedSetup = async () => {
     const [hasConnectUrl, hasParagraph, hasBootUrl] = await Promise.all([
@@ -32,27 +67,12 @@ Given(/^user navigates to SSI Agent Advanced Setup screen$/, async function() {
     return;
   }
 
-  const isOnConnectScreen = await ConnectToVeridianScreen.getConnectedButton.isDisplayed().catch(() => false);
-  if (isOnConnectScreen) {
-    const advancedSetupBtn = $("[data-testid*='advanced']");
-    const btnExists = await advancedSetupBtn.isExisting().catch(() => false);
-    if (!btnExists) {
-      throw new Error("Advanced Setup button not found on Connect to Veridian screen");
-    }
-    await advancedSetupBtn.click();
-    await browser.waitUntil(
-      async () => await isOnAdvancedSetup(),
-      {
-        timeout: 10000,
-        timeoutMsg: "Did not navigate to Advanced Setup screen",
-      }
-    );
-    return;
-  }
-
+  // At this point, we should be on the Scan screen (after clicking "Get connected" in previous step)
   const isOnScanScreen = await SsiAgentScanScreen.scanContainer.isDisplayed().catch(() => false);
   if (isOnScanScreen) {
-    await SsiAgentScanScreen.advancedSetupButton.click();
+    // clickAdvancedSetup() handles WEBVIEW context switching internally
+    await SsiAgentScanScreen.clickAdvancedSetup();
+    
     await browser.waitUntil(
       async () => await isOnAdvancedSetup(),
       {

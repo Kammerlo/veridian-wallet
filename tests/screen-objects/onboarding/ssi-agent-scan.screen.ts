@@ -12,7 +12,11 @@ export class SsiAgentScanScreen {
   }
 
   get advancedSetupButton() {
-    return $("[data-testid='tertiary-button-ssi-agent-scan']");
+    // Try specific ID first (with pageId), then fallback to generic ID (without pageId)
+    // This handles both cases: when pageId is passed and when it's not
+    return $(
+      "[data-testid='tertiary-button-ssi-agent-scan'], [data-testid='tertiary-button']"
+    );
   }
 
   get scanContainer() {
@@ -30,72 +34,68 @@ export class SsiAgentScanScreen {
     await expect(this.enterManualButton).toBeDisplayed();
   }
 
+  async clickAdvancedSetup() {
+    // Switch to webview context (switchToAppWebview already has fallback logic)
+    const { switchToAppWebview } = await import("../../helpers/webview.helper.js");
+    await switchToAppWebview();
+    
+    // Wait for element to exist in DOM
+    await this.advancedSetupButton.waitForExist({ timeout: 15000 });
+    
+    // JavaScript-native click with Shadow DOM piercing (bypasses WebdriverIO visibility checks)
+    await browser.execute((sel) => {
+      // Try both selectors (with and without pageId)
+      const selectors = sel.split(',').map(s => s.trim());
+      let element: HTMLElement | null = null;
+      
+      for (const singleSel of selectors) {
+        element = document.querySelector(singleSel) as HTMLElement | null;
+        if (element) break;
+      }
+      
+      if (!element) return;
+      
+      element.scrollIntoView({ block: "center", behavior: "smooth" });
+      
+      // Handle Ionic button shadow DOM
+      const clickableElement = (element as any).shadowRoot?.querySelector('button') || element;
+      
+      // Force native JavaScript click
+      clickableElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      (clickableElement as any).click();
+    }, "[data-testid='tertiary-button-ssi-agent-scan'], [data-testid='tertiary-button']");
+    
+    await browser.pause(500); // Allow navigation to start
+  }
+
   /**
    * Dismisses the camera mode dialog if it appears (Android emulator dialog)
-   * Optimized for speed - checks and dismisses in one pass
    */
   async dismissCameraModeDialog(): Promise<void> {
     try {
-      // Single execute call to check and dismiss dialog if present
-      const result = await browser.execute(() => {
-        // Quick check for dialog text
+      await browser.execute(() => {
         const bodyText = document.body.textContent?.toLowerCase() || '';
-        const hasDialog = bodyText.includes('entering camera mode') || bodyText.includes('camera mode');
-        
-        if (!hasDialog) {
-          return { found: false };
-        }
+        if (!bodyText.includes('camera mode')) return;
 
-        // Find and click checkbox (if present)
+        // Click "Don't remind" checkbox if present
         const checkbox = Array.from(document.querySelectorAll('input[type="checkbox"], [role="checkbox"]')).find(
-          (el) => {
-            const text = (el.textContent || '').toLowerCase();
-            return text.includes("don't remind") || text.includes('dont remind');
-          }
+          (el) => (el.textContent || '').toLowerCase().includes("don't remind")
         ) as HTMLElement | undefined;
-
-        if (checkbox) {
-          checkbox.click();
-        }
+        checkbox?.click();
 
         // Find and click "Got It" button
-        const buttons = Array.from(document.querySelectorAll('button, [role="button"], ion-button'));
-        const gotItButton = buttons.find((btn) => {
-          const text = (btn.textContent || '').toLowerCase().trim();
-          return text === 'got it' || text === 'gotit';
-        }) as HTMLElement | undefined;
+        const gotItButton = Array.from(document.querySelectorAll('button, [role="button"], ion-button')).find(
+          (btn) => (btn.textContent || '').toLowerCase().trim() === 'got it'
+        ) as HTMLElement | undefined;
 
         if (gotItButton) {
-          // Try shadow DOM for Ionic buttons
-          if ((gotItButton as any).shadowRoot) {
-            const shadowBtn = (gotItButton as any).shadowRoot.querySelector('button');
-            if (shadowBtn) {
-              shadowBtn.click();
-              return { found: true, dismissed: true };
-            }
-          }
-          gotItButton.click();
-          return { found: true, dismissed: true };
+          const clickable = (gotItButton as any).shadowRoot?.querySelector('button') || gotItButton;
+          clickable.click();
         }
-
-        return { found: true, dismissed: false };
       });
-
-      if (result.found && result.dismissed) {
-        console.log("[Camera Dialog] ✅ Dialog dismissed");
-        // Quick wait for dialog to disappear (reduced from 500ms)
-        await browser.pause(200);
-      } else if (!result.found) {
-        // Dialog not present - no action needed
-      } else {
-        console.log("[Camera Dialog] ⚠️ Dialog found but could not dismiss");
-      }
+      await browser.pause(200);
     } catch (error) {
-      // Non-blocking: if dialog handling fails, continue anyway
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      if (!errorMsg.includes("timeout")) {
-        console.log(`[Camera Dialog] Note: ${errorMsg}`);
-      }
+      // Non-blocking: continue if dialog handling fails
     }
   }
 }
