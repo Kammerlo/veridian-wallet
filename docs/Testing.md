@@ -39,6 +39,14 @@ APP_PATH=<LOCAL_PATH/App.app>
 KERIA_IP=<IP_V4>
 ```
 
+#### Android Emulator Network Configuration
+The app automatically detects when running on an Android emulator and uses `10.0.2.2` (the emulator's special alias for the host machine) to connect to Keria running in Docker on your local machine. This means:
+- **No manual configuration needed**: The app automatically uses `10.0.2.2` instead of `localhost` when running on Android emulator
+- **Keria must be running**: Ensure Keria is running in Docker and accessible on your host machine (e.g., `http://localhost:3901`)
+- **Network security**: The app includes a network security config that allows cleartext HTTP traffic to `10.0.2.2` for development
+
+If you need to override this behavior (e.g., for testing with a different IP), you can set the `KERIA_IP` environment variable.
+
 #### How to get IP v4 address:
 This is required to connect iOS simulators or physical devices to the locally running KERIA docker container on your machine. **Note:** Android emulators automatically use `10.0.2.2` to reach the host machine, so `KERIA_IP` is optional for Android emulator testing.
 #### MacOS:

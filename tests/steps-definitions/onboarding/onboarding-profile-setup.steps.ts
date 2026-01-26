@@ -80,6 +80,15 @@ Given(/^user is on Profile setup screen with Individual profile selected$/, asyn
   }
 });
 
+Given(/^user is on Group setup screen with Group profile selected$/, async function () {
+  if (!(await ProfileSetupScreen.groupNameInput.isExisting().catch(() => false))) {
+    // Navigate to group setup if not already there
+    await ProfileSetupScreen.selectGroupProfile();
+    await ProfileSetupScreen.confirmButton.click();
+    await ProfileSetupScreen.waitForGroupSetupScreen();
+  }
+});
+
 When(/^user enters username "(.*)"$/, async function (username: string) {
   await ProfileSetupScreen.enterUsername(username);
   // Wait for React state to update and validation to trigger
@@ -145,6 +154,21 @@ Then(/^user can see Continue button$/, async function () {
 Given(/^user has created individual profile with username "(.*)"$/, async function (username: string) {
   // Navigate through the flow
   await ProfileSetupScreen.selectIndividualProfile();
+  await ProfileSetupScreen.confirmButton.click();
+  await ProfileSetupScreen.waitForProfileSetupScreen();
+  await ProfileSetupScreen.enterUsername(username);
+  await browser.pause(500);
+  await ProfileSetupScreen.confirmButton.click();
+  await ProfileSetupScreen.waitForWelcomeScreen();
+});
+
+Given(/^user has created group profile with group name "(.*)" and username "(.*)"$/, async function (groupName: string, username: string) {
+  // Navigate through the flow
+  await ProfileSetupScreen.selectGroupProfile();
+  await ProfileSetupScreen.confirmButton.click();
+  await ProfileSetupScreen.waitForGroupSetupScreen();
+  await ProfileSetupScreen.enterGroupName(groupName);
+  await browser.pause(500);
   await ProfileSetupScreen.confirmButton.click();
   await ProfileSetupScreen.waitForProfileSetupScreen();
   await ProfileSetupScreen.enterUsername(username);
