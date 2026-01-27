@@ -1,4 +1,3 @@
-import { Capacitor } from "@capacitor/core";
 import { Configuration } from "./configurationService.types";
 // eslint-disable-next-line no-undef
 
@@ -48,40 +47,18 @@ class ConfigurationService {
   }
 
   private setKeriaIp() {
-    // Get Keria host: use KERIA_IP env var if set, otherwise auto-detect Android emulator
-    // For tests: Set KERIA_IP environment variable explicitly
-    let keriaHost: string | undefined;
-    if (keriaIP) {
-      keriaHost = keriaIP;
-    } else {
-      // Automatically use 10.0.2.2 for Android emulator at app runtime
-      // 10.0.2.2 is the special alias Android emulator uses to reach the host machine
-      try {
-        if (Capacitor.getPlatform() === "android") {
-          keriaHost = "10.0.2.2";
-        }
-      } catch {
-        // If Capacitor is not available (e.g., in tests), fall back to undefined
-      }
-    }
-
-    if (!keriaHost) {
-      // No host override needed
-      return;
-    }
-
     const keriaUrl = ConfigurationService.configurationEnv.keri?.keria?.url;
     const keriaBootUrl =
       ConfigurationService.configurationEnv.keri?.keria?.bootUrl;
-    if (keriaUrl && ConfigurationService.configurationEnv.keri?.keria) {
-      ConfigurationService.configurationEnv.keri.keria.url = keriaUrl.replace(
+    if (keriaIP && ConfigurationService.configurationEnv.keri?.keria?.url) {
+      ConfigurationService.configurationEnv.keri.keria.url = keriaUrl?.replace(
         /\/\/[^:]+/,
-        `//${keriaHost}`
+        `//${keriaIP}`
       );
     }
-    if (keriaBootUrl && ConfigurationService.configurationEnv.keri?.keria) {
+    if (keriaIP && ConfigurationService.configurationEnv.keri?.keria?.bootUrl) {
       ConfigurationService.configurationEnv.keri.keria.bootUrl =
-        keriaBootUrl.replace(/\/\/[^:]+/, `//${keriaHost}`);
+        keriaBootUrl?.replace(/\/\/[^:]+/, `//${keriaIP}`);
     }
   }
 

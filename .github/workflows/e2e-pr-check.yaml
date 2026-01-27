@@ -30,6 +30,7 @@ jobs:
       - name: Build project for E2E
         run: |
           export LANG=en_US.UTF-8
+          export KERIA_IP=10.0.2.2
           npm run build:e2e
 
       - name: Build Android APK
