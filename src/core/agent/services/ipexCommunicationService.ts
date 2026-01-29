@@ -1280,34 +1280,10 @@ class IpexCommunicationService extends AgentService {
     // Indexer role indicates issuer site hosting OOBIs for e.g. schemas.
     // This can be improved by resolving the indexer OOBI and using KERIA to retrieve the /loc/scheme URL.
     // For now this works, and doesn't impose security risks since schemas are secured by their SAID.
-
-    // TODO: This replacement logic is temporary and will be phased out in 1.3
-    // This is the only case where the wallet fetches an API that isn't KERIA
-    // For e2e tests: Use KERIA_IP environment variable to override the host
-    // Get Keria host from environment variable, with fallback for Android emulator
-    let keriaHost: string;
-    if (process.env.KERIA_IP) {
-      keriaHost = process.env.KERIA_IP;
-    } else {
-      // Automatically use 10.0.2.2 for Android emulator
-      // 10.0.2.2 is the special alias Android emulator uses to reach the host machine
-      try {
-        const { Capacitor } = await import("@capacitor/core");
-        if (Capacitor.getPlatform() === "android") {
-          keriaHost = "10.0.2.2";
-        } else {
-          keriaHost = "127.0.0.1";
-        }
-      } catch {
-        // If Capacitor is not available (e.g., in tests), fall back to default
-        keriaHost = "127.0.0.1";
-      }
-    }
-
     const agentBase = agentOobi
       .split("/agent")[0]
       .split("/controller")[0]
-      .replace("http://keria:3902", `http://${keriaHost}:3902`);
+      .replace("http://keria:3902", "http://127.0.0.1:3902");
 
     const indexerOobiResult = await (
       await fetch(`${agentBase}/indexer/${prefix}`)
