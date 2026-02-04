@@ -1,21 +1,22 @@
 import { IonModal, IonToggle } from "@ionic/react";
-import { useSelector } from "react-redux";
 import { useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { KeyStoreKeys, SecureStorage } from "../../../../../core/storage";
+import { i18n } from "../../../../../i18n";
 import { useAppDispatch } from "../../../../../store/hooks";
 import {
   getStateCache,
   setAuthentication,
   setToastMsg,
 } from "../../../../../store/reducers/stateCache";
-import { KeyStoreKeys, SecureStorage } from "../../../../../core/storage";
 import { ToastMsgType } from "../../../../globals/types";
+import { CreatePassword } from "../../../../pages/CreatePassword";
 import { showError } from "../../../../utils/error";
-import { i18n } from "../../../../../i18n";
 import { Alert } from "../../../Alert";
 import { ListCard } from "../../../ListCard/ListCard";
 import { ListItem } from "../../../ListCard/ListItem/ListItem";
-import { CreatePassword } from "../../../../pages/CreatePassword";
 import { Verification } from "../../../Verification";
+import { VerifyPassword } from "../../../VerifyPassword";
 
 const ManagePassword = () => {
   const dispatch = useAppDispatch();
@@ -25,6 +26,8 @@ const ManagePassword = () => {
   const [passwordIsSet, setPasswordIsSet] = useState(
     stateCache?.authentication.passwordIsSet
   );
+
+  const [confirmPassword, setConfirmPassword] = useState(false);
   const [alertEnableIsOpen, setAlertEnableIsOpen] = useState(false);
   const [alertDisableIsOpen, setAlertDisableIsOpen] = useState(false);
   const [verifyIsOpen, setVerifyIsOpen] = useState(false);
@@ -65,13 +68,17 @@ const ManagePassword = () => {
         showError("Unable to delete password", e, dispatch);
       }
     } else {
-      setCreatePasswordModalIsOpen(true);
+      openChangePassword();
     }
   };
 
   const handleChange = () => {
     userAction.current = "change";
-    setVerifyIsOpen(true);
+    setConfirmPassword(true);
+  };
+
+  const openChangePassword = () => {
+    setCreatePasswordModalIsOpen(true);
   };
 
   return (
@@ -108,7 +115,7 @@ const ManagePassword = () => {
           renderItem={(item) => (
             <ListItem
               key={item.id}
-              onClick={() => handleChange()}
+              onClick={handleChange}
               testId="settings-item-change-password"
               className="list-item"
               label={`${i18n.t(
@@ -157,6 +164,11 @@ const ManagePassword = () => {
         verifyIsOpen={verifyIsOpen}
         setVerifyIsOpen={setVerifyIsOpen}
         onVerify={onVerify}
+      />
+      <VerifyPassword
+        isOpen={confirmPassword}
+        setIsOpen={setConfirmPassword}
+        onVerify={openChangePassword}
       />
       <IonModal
         isOpen={createPasswordModalIsOpen}
