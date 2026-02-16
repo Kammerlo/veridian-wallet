@@ -1,11 +1,23 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
+import { ConnectionService } from "../../../../core/agent/services";
+import ENG_TRANS from "../../../../locales/en/en.json";
 import { identifierFix } from "../../../__fixtures__/identifierFix";
 import { profileCacheFixData } from "../../../__fixtures__/storeDataFix";
 import { makeTestStore } from "../../../utils/makeTestStore";
-import { ProfileContent } from "./ProfileContent";
-import ENG_TRANS from "../../../../locales/en/en.json";
 import { TabsRoutePath } from "../../navigation/TabsMenu";
+import { ProfileContent } from "./ProfileContent";
+
+const getOobiMock = jest.fn(() => Promise.resolve("oobi"));
+jest.mock("../../../../core/agent/agent", () => ({
+  Agent: {
+    agent: {
+      connections: {
+        getOobi: () => getOobiMock(),
+      },
+    },
+  },
+}));
 
 const defaultProfileId =
   profileCacheFixData.defaultProfile || "test-profile-id";
@@ -21,6 +33,17 @@ describe("ProfileContent", () => {
 
   const renderComponent = (storeOverrides = {}) => {
     const store = makeTestStore({
+      stateCache: {
+        routes: [TabsRoutePath.CREDENTIALS],
+        authentication: {
+          loggedIn: true,
+          time: Date.now(),
+          passcodeIsSet: true,
+          passwordIsSet: false,
+          passwordIsSkipped: true,
+        },
+        isOnline: true,
+      },
       profilesCache: profileCacheFixData,
       ...storeOverrides,
     });
@@ -358,6 +381,26 @@ describe("ProfileContent", () => {
       const connectionsValue = connectionsLabel.previousElementSibling;
 
       expect(connectionsValue?.textContent).toBe("0");
+    });
+
+    test("retry to get oobi when fetchOobi throw ConnectionService.CANNOT_GET_OOBI", async () => {
+      getOobiMock
+        .mockImplementationOnce(() =>
+          Promise.reject(new Error(ConnectionService.CANNOT_GET_OOBI))
+        )
+        .mockImplementationOnce(() =>
+          Promise.reject(new Error(ConnectionService.CANNOT_GET_OOBI))
+        )
+        .mockImplementationOnce(() => Promise.resolve("oobi-value"));
+      jest.spyOn(window, "setTimeout");
+
+      renderComponent();
+
+      await new Promise((resolve) => setTimeout(() => resolve(false), 3000));
+
+      await waitFor(() => {
+        expect(getOobiMock).toBeCalledTimes(3);
+      });
     });
   });
 
