@@ -34,7 +34,18 @@ export const SetupMemberModal = ({
   };
 
   const handleSubmit = () => {
-    setOpenSignerModal(true);
+    const hasChanged =
+      data.length !== currentSelectedConnections.length ||
+      data.some(
+        (connection) =>
+          !currentSelectedConnections.find((item) => item.id === connection.id)
+      );
+
+    if (hasChanged) {
+      setOpenSignerModal(true);
+    } else {
+      handleClose();
+    }
   };
 
   const displayConnections = useMemo(() => {
