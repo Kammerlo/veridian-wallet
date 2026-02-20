@@ -23,9 +23,7 @@ const ManagePassword = () => {
   const stateCache = useSelector(getStateCache);
   const authentication = stateCache.authentication;
   const userAction = useRef("");
-  const [passwordIsSet, setPasswordIsSet] = useState(
-    stateCache?.authentication.passwordIsSet
-  );
+  const passwordIsSet = authentication.passwordIsSet;
 
   const [confirmPassword, setConfirmPassword] = useState(false);
   const [alertEnableIsOpen, setAlertEnableIsOpen] = useState(false);
@@ -55,7 +53,6 @@ const ManagePassword = () => {
     if (passwordIsSet && userAction.current === "disable") {
       try {
         await SecureStorage.delete(KeyStoreKeys.APP_OP_PASSWORD);
-        setPasswordIsSet(false);
         userAction.current = "";
         dispatch(
           setAuthentication({
@@ -178,7 +175,6 @@ const ManagePassword = () => {
       >
         <CreatePassword
           handleClear={handleClear}
-          setPasswordIsSet={setPasswordIsSet}
           userAction={userAction}
         />
       </IonModal>
