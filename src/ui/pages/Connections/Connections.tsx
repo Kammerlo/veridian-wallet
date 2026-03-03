@@ -109,6 +109,8 @@ const Connections = () => {
         value,
       }));
       setMappedConnections(mapToArray);
+    } else {
+      setMappedConnections([]);
     }
   }, [profileConnections]);
 
