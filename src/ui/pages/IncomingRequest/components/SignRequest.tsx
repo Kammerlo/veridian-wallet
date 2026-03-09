@@ -6,6 +6,7 @@ import {
 } from "ionicons/icons";
 import { useEffect, useRef, useState } from "react";
 import { i18n } from "../../../../i18n";
+import { JSONObject } from "../../../../core/agent/agent.types";
 import { IncomingRequestType } from "../../../../store/reducers/stateCache/stateCache.types";
 import {
   CardBlock,
@@ -35,19 +36,26 @@ const SignRequest = ({
   const attributeContainerRef = useRef<HTMLDivElement>(null);
   const attributeRef = useRef<HTMLDivElement>(null);
   const signRequest = requestData.signTransaction;
-  const signDetails = (() => {
-    if (!requestData.signTransaction) {
-      return {};
-    }
+  const [isJSON, setIsJSON] = useState(false);
+  const [signDetails, setSignDetails] = useState<JSONObject | string>({});
 
-    let signContent;
-    try {
-      signContent = JSON.parse(requestData.signTransaction.payload.payload);
-    } catch (error) {
-      signContent = requestData.signTransaction.payload.payload;
+  useEffect(() => {
+    if (!requestData.signTransaction) {
+      setSignDetails({});
+      setIsJSON(false);
+      return;
     }
-    return signContent;
-  })();
+    const payload = requestData.signTransaction.payload.payload;
+    try {
+      const parsed = JSON.parse(payload);
+      setSignDetails(parsed);
+      setIsJSON(true);
+    } catch (error) {
+      setSignDetails(payload);
+      setIsJSON(false);
+    }
+  }, [requestData.signTransaction]);
+
   const logo = requestData.peerConnection.iconB64;
 
   const handleSign = () => {
@@ -143,17 +151,18 @@ const SignRequest = ({
         <div className="sign-content">
           <CardBlock
             className="sign-identifier"
-            testId="related-profile"
+            testId="identifier"
             title={i18n.t("request.sign.identifier")}
+            copyContent={signRequest?.payload.identifier}
           >
             <CardDetailsItem
               info={`${signRequest?.payload.identifier.substring(
                 0,
-                5
-              )}...${signRequest?.payload.identifier.slice(-5)}`}
+                8
+              )}...${signRequest?.payload.identifier.slice(-8)}`}
               icon={keyOutline}
               className="member"
-              testId="related-identifier-detail"
+              testId="identifier-detail"
               mask={false}
             />
           </CardBlock>
@@ -169,9 +178,9 @@ const SignRequest = ({
                 ref={attributeRef}
                 className="content"
               >
-                {typeof signDetails === "object" ? (
+                {isJSON ? (
                   <CardDetailsAttributes
-                    data={signDetails}
+                    data={signDetails as JSONObject}
                     itemProps={{
                       mask: false,
                       fullText: true,
@@ -188,6 +197,7 @@ const SignRequest = ({
             </div>
             {displayExpandButton && (
               <div
+                data-testid="expand-footer"
                 className="footer"
                 onClick={onExpandData}
               >
