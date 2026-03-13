@@ -16,7 +16,7 @@ import {
   CardBlock,
   CardDetailsExpandAttributes,
   CardDetailsItem,
-  FlatBorderType
+  FlatBorderType,
 } from "../../CardDetails";
 import { FallbackIcon } from "../../FallbackIcon";
 import { ListHeader } from "../../ListHeader";

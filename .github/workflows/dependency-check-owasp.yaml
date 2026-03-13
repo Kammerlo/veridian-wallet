@@ -1,19 +1,18 @@
-name: dependency-check-owasp-android
+name: dependency-check-owasp-package-json
 
 on:
-  push:
+  pull_request:
     paths: &shared-trigger-paths
-      - "android/**"
-      - "**/*.gradle"
-      - "**/gradle*.properties"
-      - ".github/workflows/dependency-check-owasp-android.yml"
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/dependency-check-owasp.yaml'
+    types: [ opened, synchronize ]
+  push:
+    paths: *shared-trigger-paths
     branches:
       - main
       - develop
-      - 'releases/**'
-  pull_request:
-    paths: *shared-trigger-paths
-    types: [ opened, synchronize ]
+      - release/**
 
 jobs:
   depcheck:
@@ -41,8 +40,8 @@ jobs:
       - name: Run Dependency-Check
         uses: dependency-check/Dependency-Check_Action@2ba636726705b0f74f126ebeaacaf2ad4600b967 # main at 01/10/2025
         with:
-          project: "veridian-wallet-android"
-          path: "android"
+          project: "veridian-wallet"
+          path: "."
           format: "ALL"
           out: "reports"
           args: "--failOnCVSS 7 --nvdApiKey ${{ env.NVD_API_KEY }} --suppression dependency-check-suppression.xml --disableNodeAudit --disableYarnAudit"
@@ -52,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: depcheck-android-report
+          name: depcheck-package-report
           path: "reports/dependency-check-report.html"
 
       - name: Upload SARIF to code scanning

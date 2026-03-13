@@ -155,7 +155,14 @@ const LockPageContainer = () => {
         dispatch(showGenericError(true));
         break;
     }
-  }, [isInBiometricProcess, disablePrivacy, handleBiometricAuth, resetLoginAttempt, enablePrivacy, dispatch]);
+  }, [
+    isInBiometricProcess,
+    disablePrivacy,
+    handleBiometricAuth,
+    resetLoginAttempt,
+    enablePrivacy,
+    dispatch,
+  ]);
 
   const handleUseBiometrics = useCallback(async () => {
     if (remainingLockoutSeconds > 0) {
