@@ -43,7 +43,7 @@ env:
 
 jobs:
   set-matrix:
-    runs-on: arc-runner-set
+    runs-on: ${{ fromJson(vars.RUNS_ON) }}
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -56,7 +56,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: arc-runner-set
+    runs-on: ${{ fromJson(vars.RUNS_ON) }}
     strategy:
       matrix: ${{fromJson(needs.set-matrix.outputs.matrix)}}
     steps:
@@ -255,7 +255,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: arc-runner-set
+    runs-on: ${{ fromJson(vars.RUNS_ON) }}
     steps:
 
       # Manually doing this instead of using the cloudposse/read action as it seems there is some issue with it
@@ -322,7 +322,7 @@ jobs:
           fi
 
   dispatch-build-success-event:
-    runs-on: arc-runner-set
+    runs-on: ${{ fromJson(vars.RUNS_ON) }}
     if: github.repository == vars.DISPATCHER_REPO
     needs:
       - merge-multi-platform-manifests

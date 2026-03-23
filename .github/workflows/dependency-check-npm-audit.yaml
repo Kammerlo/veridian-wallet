@@ -19,7 +19,7 @@ env:
 
 jobs:
   depcheck:
-    runs-on: arc-runner-set
+    runs-on: ${{ fromJson(vars.RUNS_ON) }}
 
     steps:
     - name: Checkout

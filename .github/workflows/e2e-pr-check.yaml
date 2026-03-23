@@ -8,7 +8,7 @@ on:
 jobs:
   e2e-onboarding-intro:
     timeout-minutes: 60
-    runs-on: arc-runner-set
+    runs-on: ${{ fromJson(vars.RUNS_ON) }}
     steps:
 
       # Running some environment optimization as per https://github.com/ReactiveCircus/android-emulator-runner/issues/324#issuecomment-2009351180
