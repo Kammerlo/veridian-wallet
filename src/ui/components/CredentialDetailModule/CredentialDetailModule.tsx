@@ -316,8 +316,11 @@ const CredentialDetailModule = ({
     }
   };
 
+  const [isHeartAnimating, setIsHeartAnimating] = useState(false);
+
   const toggleFavouriteCred = () => {
     if (!cardData) return;
+    setIsHeartAnimating(true);
     handleSetFavourite(id);
   };
 
@@ -352,9 +355,10 @@ const CredentialDetailModule = ({
           shape="round"
           className={`heart-button-${
             isFavourite ? "favourite" : "no-favourite"
-          }`}
+          }${isHeartAnimating ? " heart-button-animating" : ""}`}
           data-testid="heart-button"
           onClick={toggleFavouriteCred}
+          onAnimationEnd={() => setIsHeartAnimating(false)}
         >
           <IonIcon
             slot="icon-only"

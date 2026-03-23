@@ -11,14 +11,19 @@ permissions: {}
 jobs:
   zizmor:
     name: Run zizmor 🌈
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     permissions:
       security-events: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
+
+      - name: Set advanced-security based on repo visibility
+        id: repo-visibility
+        run: echo "ADVANCED_SECURITY=$(if [ '${{ github.event.repository.private }}' = 'true' ]; then echo 'private'; else echo 'public'; fi)" | tee -a $GITHUB_ENV | tee -a $GITHUB_OUTPUT
 
       - name: Run zizmor 🌈
         uses: zizmorcore/zizmor-action@e673c3917a1aef3c65c972347ed84ccd013ecda4 # v0.2.0
+        with:
+          advanced-security: ${{ steps.repo-visibility.outputs.ADVANCED_SECURITY }}

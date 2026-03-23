@@ -28,6 +28,33 @@
     }
   }
 
+  @keyframes heart-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.35);
+    }
+  }
+
+  @keyframes bg-expand-favourite {
+    from {
+      background: radial-gradient(
+        circle at center,
+        var(--ion-color-error-100) 0%,
+        var(--ion-color-neutral-100) 0%
+      );
+    }
+    to {
+      background: radial-gradient(
+        circle at center,
+        var(--ion-color-error-100) 150%,
+        var(--ion-color-neutral-100) 150%
+      );
+    }
+  }
+
   .page-header,
   .card-details-content {
     -webkit-animation: fadein 0.7s; /* Safari, Chrome and Opera > 12.1 */
@@ -43,6 +70,7 @@
       height: 2.75rem;
       border-radius: 1.5rem;
       background: var(--ion-color-neutral-100);
+      transition: background 0.35s ease;
 
       &:not(:first-child) {
         margin-left: 0.5rem;
@@ -55,8 +83,22 @@
       &.heart-button-favourite {
         background: var(--ion-color-error-100);
 
+        &.heart-button-animating {
+          animation: bg-expand-favourite 0.4s ease-out forwards;
+
+          .heart-icon-favourite {
+            animation: heart-pulse 0.35s ease-in-out;
+          }
+        }
+
         .heart-icon-favourite {
           color: var(--ion-color-danger);
+        }
+      }
+
+      &.heart-button-no-favourite.heart-button-animating {
+        .heart-icon-no-favourite {
+          animation: heart-pulse 0.35s ease-in-out;
         }
       }
     }

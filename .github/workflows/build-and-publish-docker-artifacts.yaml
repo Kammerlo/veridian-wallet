@@ -43,7 +43,7 @@ env:
 
 jobs:
   set-matrix:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -56,7 +56,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     strategy:
       matrix: ${{fromJson(needs.set-matrix.outputs.matrix)}}
     steps:
@@ -255,7 +255,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     steps:
 
       # Manually doing this instead of using the cloudposse/read action as it seems there is some issue with it
@@ -322,7 +322,7 @@ jobs:
           fi
 
   dispatch-build-success-event:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     needs:
       - merge-multi-platform-manifests
     steps:

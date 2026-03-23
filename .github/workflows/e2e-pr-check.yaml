@@ -8,13 +8,15 @@ on:
 jobs:
   e2e-onboarding-intro:
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     steps:
 
       # Running some environment optimization as per https://github.com/ReactiveCircus/android-emulator-runner/issues/324#issuecomment-2009351180
       # From https://github.com/android/nowinandroid/pull/1219/files to fix flaky emulator start
       # See https://github.com/ReactiveCircus/android-emulator-runner/issues/324#issuecomment-1998737488
       - name: Delete unnecessary tools 🔧
+        # only run if runner is ubuntu-latest
+        if: ${{ contains(runner.labels, 'ubuntu-latest') }}
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           android: false # Keep Don't remove Android tools
@@ -28,6 +30,8 @@ jobs:
       # Set up KVM permissions to enable efficient Android emulator runs by modifying udev rules for universal access.
       # From https://github.com/android/nowinandroid/blob/main/.github/workflows/Build.yaml#L142
       - name: Enable KVM group perms
+        # only run if runner is ubuntu-latest
+        if: ${{ contains(runner.labels, 'ubuntu-latest') }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
